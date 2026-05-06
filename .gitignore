@@ -1,0 +1,11 @@
+.vscode/
+node_modules/
+dist/
+.env
+e2e/
+public/
+release/
+build/
+
+
+

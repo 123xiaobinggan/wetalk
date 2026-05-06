@@ -1,0 +1,95 @@
+{
+  "name": "wetalk",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite",
+    "start": "nodemon --exec electron .",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "build": "npm run type-check && npm run build-only",
+    "preview": "vite preview",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder --win",
+    "dist:win": "npm run build && electron-builder --win --x64",
+    "test:unit": "vitest",
+    "test:e2e": "playwright test",
+    "format": "prettier --write --experimental-cli src/"
+  },
+  "build": {
+    "appId": "com.wetalk.desktop",
+    "productName": "WeTalk",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js",
+      "webSocket/**/*",
+      "build/wetalk.ico",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "icon": "build/wetalk.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "WeTalk"
+    }
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "browser-image-compression": "^2.0.2",
+    "electron-store": "^11.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.27",
+    "vue-router": "^5.0.1",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.1",
+    "@rollup/plugin-inject": "^5.0.5",
+    "@tsconfig/node24": "^24.0.4",
+    "@types/jsdom": "^27.0.0",
+    "@types/node": "^24.10.9",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.8.1",
+    "buffer": "^6.0.3",
+    "electron": "^40.2.1",
+    "electron-builder": "^26.8.1",
+    "jsdom": "^27.4.0",
+    "nodemon": "^3.1.11",
+    "npm-run-all2": "^8.0.4",
+    "prettier": "3.8.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "typescript": "~5.9.3",
+    "util": "^0.12.5",
+    "vite": "^7.3.1",
+    "vite-plugin-node-polyfills": "^0.25.0",
+    "vite-plugin-vue-devtools": "^8.0.5",
+    "vitest": "^4.0.18",
+    "vue-tsc": "^3.2.4"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

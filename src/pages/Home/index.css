@@ -1,0 +1,11 @@
+.home-container{
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar{
+    width: 6.67%;
+    background-color: #f0f0f0;
+    border-right: 1px solid #ccc;
+}
