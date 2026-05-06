@@ -2,16 +2,13 @@ wetalk
 仿微信IM客户端
 
 frontend：
-electron + vue3 + vite + pinia 状态管理 + vue-router 路由管理
-+ ws 长连接 
+electron + vue3 + vite + pinia 状态管理 + vue-router 路由管理 + ws 长连接 
 
 backend:
-java + springboot3 + mybatis + mysql + redis + netty 
-+ webRTC P2P 音视频
+java + springboot3 + mybatis + mysql + redis + netty + webRTC P2P 音视频
 
 server:
-2 cores + 2GB memory + 40GB SSD + 1Mbps bandwidth
-+ nginx 反向代理
+2 cores + 2GB memory + 40GB SSD + 1Mbps bandwidth + nginx 反向代理
 
 使用netty: 支持高并发
 p2p通信: 流量不经服务器端转发, 节省带宽, 提高性能
