@@ -706,6 +706,12 @@ export const useConversationStore = defineStore('conversation', {
       }
 
       list.push(message)
+
+      const userStore = useUserStore()
+
+      if (Number(message.senderId) !== Number(userStore.userInfo.userId)) {
+        window.electronAPI?.notifyNewMessage?.()
+      }
     },
 
     sendMsgSuccess({ clientMsgId, data }) {

@@ -2,7 +2,7 @@
 <template>
   <div class="sidebar">
     <!-- 用户头像 -->
-    <div class="avatar-section" @click="businessCard.showCard(userStore.userInfo, $event)">
+    <div class="avatar-section" @click="businessCardStore.showCard(userStore.userInfo, $event)">
       <img :src="userStore.userInfo.avatar" alt="User Avatar" class="avatar" />
     </div>
 
@@ -59,7 +59,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
-const businessCard = useBusinessCardStore()
+const businessCardStore = useBusinessCardStore()
 
 const menuItems = computed(() => [
   {
@@ -97,9 +97,17 @@ const getIcon = (item) => {
 }
 
 const navigate = (routePath) => {
+  if (routePath === '/home/moments') {
+    openMoments()
+    return
+  }
   if (routePath) {
     router.replace(routePath)
   }
+}
+
+const openMoments = () => {
+  // window.electronAPI?.openMoments()
 }
 
 const openSettings = () => {

@@ -83,6 +83,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     }
   },
 
+  notifyNewMessage: () => ipcRenderer.invoke('app:notifyNewMessage'),
+
   // ws
   wsSend: (payload) => ipcRenderer.invoke('ws:send', payload),
   // 收到消息

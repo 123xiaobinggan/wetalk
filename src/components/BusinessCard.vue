@@ -4,26 +4,13 @@
     <div class="business-card" :style="cardStyle" @click.stop="businessCardStore.closeMenu">
       <!-- 上部分：头像 + 备注/用户名 + AccountId + 地区 -->
       <div class="header-section">
-        <img
-          :src="businessCardStore.userInfo.avatar"
-          alt="Avatar"
-          class="avatar"
-          @click.stop="previewAvatar"
-        />
+        <img :src="businessCardStore.userInfo.avatar" alt="Avatar" class="avatar" @click.stop="previewAvatar" />
         <div class="info">
           <div class="remark-or-username">
             <template v-if="businessCardStore.isEditingRemark">
-              <input
-                ref="remarkInputRef"
-                v-model.trim="businessCardStore.remarkDraft"
-                class="remark-input"
-                type="text"
-                maxlength="20"
-                @click.stop
-                @keydown.enter.prevent="handleSaveRemark"
-                @keydown.esc.prevent="businessCardStore.cancelRemark"
-                @blur="handleSaveRemark"
-              />
+              <input ref="remarkInputRef" v-model.trim="businessCardStore.remarkDraft" class="remark-input" type="text"
+                maxlength="20" @click.stop @keydown.enter.prevent="handleSaveRemark"
+                @keydown.esc.prevent="businessCardStore.cancelRemark" @blur="handleSaveRemark" />
             </template>
 
             <template v-else>
@@ -32,11 +19,7 @@
               }}</span>
             </template>
 
-            <img
-              :src="getImageUrl(businessCardStore.getSexIcon())"
-              alt="Gender"
-              class="gender-icon"
-            />
+            <img :src="genderIcon" alt="Gender" class="gender-icon" />
           </div>
           <div class="username" v-show="businessCardStore.isOther">
             {{ businessCardStore.userInfo.username }}
@@ -45,50 +28,30 @@
           <div class="region">地区: {{ businessCardStore.userInfo.areaName }}</div>
         </div>
         <!-- 设置按钮 -->
-        <div
-          class="settings"
-          v-show="businessCardStore.isOther"
-          @click.stop="businessCardStore.toggleMenu"
-        >
+        <div class="settings" v-show="businessCardStore.isOther" @click.stop="businessCardStore.toggleMenu">
           <span class="settings-icon">...</span>
           <!-- 下拉菜单 -->
           <div class="dropdown-menu" v-show="businessCardStore.isMenuVisible" @click.stop>
-            <div
-              class="menu-item"
-              v-if="!businessCardStore.isNotFriendOrDeleted"
-              @click.stop="startEditRemark"
-            >
-              设置备注
+            <div class="menu-item" v-if="!businessCardStore.isNotFriendOrDeleted" @click.stop="startEditRemark">
+              设置备注{{ businessCardStore.isNotFriendOrDeleted }}
             </div>
-            <div
-              class="menu-item"
-              v-if="!businessCardStore.isNotFriendOrDeleted"
-              @click.stop="businessCardStore.setPermissions"
-            >
+            <div class="menu-item" v-if="!businessCardStore.isNotFriendOrDeleted"
+              @click.stop="businessCardStore.setPermissions">
               设置权限
             </div>
-            <div
-              class="menu-item"
-              v-if="!businessCardStore.isNotFriendOrDeleted"
-              @click.stop="businessCardStore.recommendToFriend"
-            >
+            <div class="menu-item" v-if="!businessCardStore.isNotFriendOrDeleted"
+              @click.stop="businessCardStore.recommendToFriend">
               把Ta推荐给朋友
             </div>
-            <div
-              v-if="!businessCardStore.isBlocked"
-              class="menu-item danger"
-              @click.stop="businessCardStore.blockFriend"
-            >
+            <div v-if="!businessCardStore.isBlocked" class="menu-item danger"
+              @click.stop="businessCardStore.blockFriend">
               加入黑名单
             </div>
             <div v-else class="menu-item danger" @click.stop="businessCardStore.unBlockFriend">
               移出黑名单
             </div>
-            <div
-              class="menu-item danger"
-              v-if="!businessCardStore.isNotFriendOrDeleted"
-              @click.stop="businessCardStore.deleteFriend"
-            >
+            <div class="menu-item danger" v-if="!businessCardStore.isNotFriendOrDeleted"
+              @click.stop="businessCardStore.deleteFriend">
               删除好友
             </div>
           </div>
@@ -102,13 +65,8 @@
           <img src="../assets/BusinessCard/arrow-right.png" alt="Arrow" class="arrow-icon" />
         </div>
         <div class="moments-preview">
-          <img
-            v-for="(moment, index) in businessCardStore.userInfo.moments.slice(0, 4)"
-            :key="index"
-            :src="moment.image"
-            alt="Moment"
-            class="moment-image"
-          />
+          <img v-for="(moment, index) in businessCardStore.userInfo.moments.slice(0, 4)" :key="index"
+            :src="moment.image" alt="Moment" class="moment-image" />
         </div>
       </div>
 
@@ -195,6 +153,9 @@ const imagePreviewStore = useImagePreviewStore()
 const userStore = useUserStore()
 const router = useRouter()
 
+import boyIcon from '../assets/BusinessCard/boy.png'
+import girlIcon from '../assets/BusinessCard/girl.png'
+
 const remarkInputRef = ref(null)
 
 const cardStyle = computed(() => ({
@@ -221,10 +182,14 @@ const previewAvatar = () => {
   })
 }
 
-const getImageUrl = (name) => {
-  return new URL(`${name}`, import.meta.url).href
-}
+const genderIcon = computed(() => {
+  const sex = businessCardStore.userInfo.sex
+
+  return sex === 1 || sex === true || sex === '1' ? boyIcon : girlIcon
+})
+
 </script>
+
 <style scoped>
 .mask {
   position: fixed;

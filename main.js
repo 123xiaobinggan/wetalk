@@ -32,6 +32,8 @@ let audioCallWindow = null
 let audioCallPayload = null
 let audioCallForceClosing = false
 let audioCallCloseTimer = null
+
+let taskbarNotifyTimer = null
 // 创建登录窗口
 function createEnterWindow() {
   enterWindow = new BrowserWindow({
@@ -386,6 +388,10 @@ ipcMain.handle('call:startAudio', async (_event, payload) => {
   return { code: 0, msg: '成功' }
 })
 
+ipcMain.handle('app:notifyNewMessage', async (_event, payload) => { 
+  notifyTaskbarNewMessage()
+})
+
 // 结束
 ipcMain.handle('call:closeAudioWindow', async () => {
   audioCallForceClosing = true
@@ -620,4 +626,47 @@ function loadPage(win, route = '/') {
 
 function getAppIcon() {
   return path.join(__dirname, 'build/wetalk.ico')
+}
+
+function getBadgeIcon() {
+  return nativeImage.createFromPath(path.join(__dirname, 'build/badge-red.png'))
+}
+
+function notifyTaskbarNewMessage() {
+  if (!mainWindow || mainWindow.isDestroyed()) return
+
+  // 如果主窗口正在前台，就不闪
+  if (mainWindow.isFocused() && !mainWindow.isMinimized()) {
+    return
+  }
+
+  // 1. 闪烁任务栏
+  mainWindow.flashFrame(true)
+
+  // 3. macOS Dock 弹跳，可选
+  if (process.platform === 'darwin') {
+    app.dock.bounce('informational')
+    app.dock.setBadge('•')
+  }
+
+  // 闪一下后恢复
+  if (taskbarNotifyTimer) {
+    clearTimeout(taskbarNotifyTimer)
+  }
+
+  taskbarNotifyTimer = setTimeout(() => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.flashFrame(false)
+
+      if (process.platform === 'win32') {
+        mainWindow.setOverlayIcon(null, '')
+      }
+
+      if (process.platform === 'darwin') {
+        app.dock.setBadge('')
+      }
+    }
+
+    taskbarNotifyTimer = null
+  }, 2500)
 }

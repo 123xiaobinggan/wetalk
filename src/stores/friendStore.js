@@ -25,10 +25,8 @@ export const useFriendStore = defineStore('friend', {
       return (friendUserId) => {
         if (state.friendships[friendUserId]) {
           return state.friendships[friendUserId]
-        } else {
-          this.getFriendship(friendUserId)
-          return {}
-        }
+        } 
+        return {}
       }
     },
     isFriend(state) {
@@ -122,7 +120,7 @@ export const useFriendStore = defineStore('friend', {
     async getFriendship(friendUserId) {
       const userStore = useUserStore()
       const toastStore = useToastStore()
-      if (userStore.userInfo.userId === friendUserId) return
+      if (userStore.userInfo.userId === friendUserId) return {}
       if (this.friendships[friendUserId]) {
         return this.friendships[friendUserId]
       }
@@ -138,13 +136,13 @@ export const useFriendStore = defineStore('friend', {
         console.log('getFriendship', res)
         if (res.code === 0) {
           this.friendships[friendUserId] = res.data.friendship
+          return res.data.friendship
         } else {
           console.log(res.msg)
-          toastStore.error(res.msg)
         }
+        return {}
       } catch (e) {
         console.log(e)
-        toastStore.error('获取好友关系失败')
       } finally {
         delete this.fetchingFriendships[friendUserId]
       }

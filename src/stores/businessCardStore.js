@@ -21,7 +21,7 @@ export const useBusinessCardStore = defineStore('businessCard', {
       accountId: '',
       username: '',
       remark: '',
-      avatar: '',
+      avatar: 'http://120.48.156.237:90/static_resources/mytalk/avatar/spread_hands.jpg',
       sex: 1,
       areaName: '',
       areaCode: '',
@@ -43,16 +43,20 @@ export const useBusinessCardStore = defineStore('businessCard', {
       const userStore = useUserStore()
       return state.userInfo.userId !== userStore.userInfo.userId
     },
+
     isNotFriendOrDeleted(state) {
       if (!this.isOther) return true
       const friendStore = useFriendStore()
+      friendStore.getFriendship(state.userInfo.userId)
       const friendship = friendStore.gettersFriendship(state.userInfo.userId)
       console.log('friendship', friendship)
       if (friendship) {
-        return friendship.deleted
+        console.log('friendship.deleted', friendship)
+        return friendship?.deleted
       }
       return true
     },
+
     isBlocked(state) {
       const friendStore = useFriendStore()
       const friendship = friendStore.gettersFriendship(state.userInfo.userId)
@@ -67,7 +71,7 @@ export const useBusinessCardStore = defineStore('businessCard', {
         accountId: '',
         username: '',
         remark: '',
-        avatar: '',
+        avatar: 'http://120.48.156.237:90/static_resources/mytalk/avatar/spread_hands.jpg',
         sex: 1,
         areaName: '',
         areaCode: '',
@@ -91,7 +95,7 @@ export const useBusinessCardStore = defineStore('businessCard', {
       this.isPermissionsDialogVisible = false
 
       if (userInfo.userId !== userStore.userInfo.userId) {
-        const friendship = friendStore.gettersFriendship(userInfo.userId)
+        const friendship = friendStore.getFriendship(userInfo.userId)
         console.log('friendship', friendship)
         if (friendship) {
           userInfo.remark = friendship.remark
@@ -151,12 +155,6 @@ export const useBusinessCardStore = defineStore('businessCard', {
 
     showMoments() {
       console.log('show moments')
-    },
-
-    getSexIcon() {
-      return this.userInfo.sex === 1
-        ? '../assets/BusinessCard/boy.png'
-        : '../assets/BusinessCard/girl.png'
     },
 
     setRemark() {
