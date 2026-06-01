@@ -34,7 +34,7 @@ public class Group {
         this.status = status;
         this.createdTime = createdTime;
         if (this.groupAvatar == null) {
-            this.groupAvatar = "http://120.48.156.237:90/static_resources/wetalk/avatar/spread_hands.jpg";
+            this.groupAvatar = "";
         }
         if (this.createdTime == null) {
             this.createdTime = TimeUtils.currentTime();

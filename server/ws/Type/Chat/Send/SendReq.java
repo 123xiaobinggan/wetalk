@@ -8,6 +8,7 @@ import lombok.Data;
 public class SendReq {
     private Long sessionId;
     private Long senderId;
+    private String clientMsgId;
     private Boolean convType;
     private Long peerId;
     private int msgType;

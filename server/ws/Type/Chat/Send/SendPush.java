@@ -1,7 +1,7 @@
 package com.wetalk.ws.Type.Chat.Send;
 
 import com.wetalk.model.Conversation;
-import com.wetalk.VO.MessageController.MessageVO;
+import com.wetalk.business.message.vo.MessageVO;
 import java.time.LocalDateTime;
 
 import lombok.Data;

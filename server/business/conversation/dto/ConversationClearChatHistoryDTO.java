@@ -1,0 +1,23 @@
+package com.wetalk.business.conversation.dto;
+
+import lombok.Data;
+
+@Data
+public class ConversationClearChatHistoryDTO {
+    private Long convId;
+
+    public ConversationClearChatHistoryDTO(){}
+
+    public ConversationClearChatHistoryDTO(Long convId) {
+        this.convId = convId;
+    }
+
+    public Long getConvId() {
+        return convId;
+    }
+
+    public void setConvId(Long convId) {
+        this.convId = convId;
+    }
+
+}

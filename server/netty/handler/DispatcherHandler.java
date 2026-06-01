@@ -5,7 +5,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
-import com.wetalk.service.MessageService;
 import io.netty.channel.ChannelHandler;
 
 import org.springframework.stereotype.Component;
@@ -13,11 +12,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 
-import com.wetalk.service.*;
-import com.wetalk.ws.Type.Chat.Send.*;
+import com.wetalk.ws.Type.Chat.Send.RecallReq;
+import com.wetalk.ws.Type.Chat.Send.SendPush;
+import com.wetalk.ws.Type.Chat.Send.SendReq;
+import com.wetalk.ws.Type.Chat.Send.SendResp;
 import com.wetalk.ws.protocol.event.*;
 import com.wetalk.ws.protocol.WsType;
 import com.wetalk.ws.protocol.WsIncomeMessage;
+import com.wetalk.ws.Type.Call.CallReq;
+import com.wetalk.mq.producer.WsEventProducer;
+import com.wetalk.mq.event.WsEvent;
+import com.wetalk.netty.constant.ChannelAttrKey;
+import com.wetalk.business.message.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @ChannelHandler.Sharable
 public class DispatcherHandler extends ChannelInboundHandlerAdapter {
-
+    private final WsEventProducer wsEventProducer;
     private final MessageService messageService;
 
     @Override
@@ -104,31 +110,37 @@ public class DispatcherHandler extends ChannelInboundHandlerAdapter {
 
     private void dispatchChat(ChannelHandlerContext ctx, String event, WsIncomeMessage<Object> wsIncomeMessage) {
         Object data = wsIncomeMessage.getData();
+        Long userId = ctx.channel().attr(ChannelAttrKey.USER_ID).get();
+        WsEvent wsEvent;
         switch (event) {
             case ChatEvent.SEND:
-                wsIncomeMessage.setData(JSON.parseObject(
-                        JSON.toJSONString(data),
-                        SendReq.class));
-                messageService.handleSendMessage(ctx, wsIncomeMessage);
+                SendReq sendReq = JSON.parseObject(JSON.toJSONString(data), SendReq.class);
+                sendReq.setClientMsgId(wsIncomeMessage.getClientMsgId());
+                wsEvent = new WsEvent(WsType.CHAT, event, userId, sendReq.getSessionId(),
+                        JSON.toJSONString(sendReq));
+                wsEventProducer.sendChatSendEvent(wsEvent);
                 break;
             case ChatEvent.RECALL:
-                wsIncomeMessage.setData(JSON.parseObject(
-                        JSON.toJSONString(data),
-                        RecallReq.class));
-                messageService.handleRecallMessage(ctx, wsIncomeMessage);
+                RecallReq recallReq = JSON.parseObject(JSON.toJSONString(data), RecallReq.class);
+                recallReq.setClientMsgId(wsIncomeMessage.getClientMsgId());
+                wsEvent = new WsEvent(WsType.CHAT, event, userId, recallReq.getSessionId(),
+                        JSON.toJSONString(recallReq));
+                wsEventProducer.sendChatRecallEvent(wsEvent);
                 break;
             default:
                 System.out.println("未知 chat event: " + event);
         }
     }
 
-    private void dispatchFriend(ChannelHandlerContext ctx, String event, WsIncomeMessage<Object> wsIncomMessage) {
-    }
-
     private void dispatchCall(ChannelHandlerContext ctx, String event, WsIncomeMessage<Object> wsIncomeMessage) {
+        Object data = wsIncomeMessage.getData();
+        Long userId = ctx.channel().attr(ChannelAttrKey.USER_ID).get();
+        CallReq callReq = JSON.parseObject(JSON.toJSONString(data), CallReq.class);
+        callReq.setClientMsgId(wsIncomeMessage.getClientMsgId());
+        WsEvent wsEvent = new WsEvent(WsType.CALL, event, userId, callReq.getSessionId(), JSON.toJSONString(callReq));
         switch (event) {
             case "audio_call":
-                messageService.handleCallInvite(ctx, wsIncomeMessage);
+                wsEventProducer.sendCallAudioCallEvent(wsEvent);
                 break;
             case "audio_reject":
                 messageService.handleCallForward(ctx, wsIncomeMessage, "audio_reject", "对方已拒绝");
@@ -143,9 +155,13 @@ public class DispatcherHandler extends ChannelInboundHandlerAdapter {
                 messageService.handleCallForward(ctx, wsIncomeMessage, "audio_busy", "对方忙线中");
                 break;
             case "audio_end":
-                messageService.handleCallEnd(ctx, wsIncomeMessage);
+                wsEventProducer.sendCallAudioEndEvent(wsEvent);
+                break;
         }
 
+    }
+
+    private void dispatchFriend(ChannelHandlerContext ctx, String event, WsIncomeMessage<Object> wsIncomeMessage) {
     }
 
     private void dispatchConn(ChannelHandlerContext ctx, String event, WsIncomeMessage<Object> wsIncomeMessage) {

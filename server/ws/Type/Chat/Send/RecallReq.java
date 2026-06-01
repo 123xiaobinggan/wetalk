@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class RecallReq {
     private Long sessionId;
+    private String clientMsgId;
     private Long msgId;
     private Long peerId;
     private Boolean convType;

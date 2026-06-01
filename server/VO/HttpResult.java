@@ -1,4 +1,4 @@
-package com.wetalk.VO;
+package com.wetalk.vo;
 
 public class HttpResult<T> {
     private int code;

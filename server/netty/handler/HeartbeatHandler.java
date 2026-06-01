@@ -103,7 +103,6 @@ public class HeartbeatHandler extends ChannelInboundHandlerAdapter {
      * 判断是否是心跳消息
      */
     private boolean isHeartbeatMessage(Object msg) {
-        // 根据你的协议判断，示例：使用 JSON 格式
         if (msg instanceof TextWebSocketFrame) {
             String text = ((TextWebSocketFrame) msg).text();
             JSONObject json = JSON.parseObject(text);

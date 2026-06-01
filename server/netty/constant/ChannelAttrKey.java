@@ -1,7 +1,8 @@
 package com.wetalk.netty.constant;
 
 import io.netty.util.AttributeKey;
-import com.wetalk.netty.handler.*;
+
+import com.wetalk.netty.handler.HeartbeatHandler;
 
 public class ChannelAttrKey {
 
