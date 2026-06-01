@@ -33,7 +33,7 @@
 | MySQL                | 关系型数据库         |
 | Redis                | 缓存 (用户信息/Token/会话状态) |
 | Netty                | WebSocket 长连接服务 |
-| RocketMQ / RabbitMQ* | 消息队列 (异步推送/解耦) |
+| RocketMQ             | 消息队列 (异步推送/解耦) |
 | JWT                  | 用户认证             |
 | Lombok               | 简化代码             |
 
