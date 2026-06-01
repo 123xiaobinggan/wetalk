@@ -188,7 +188,7 @@ function createAudioCallWindow() {
 
 // ====== WebSocket ======
 function createWs() {
-  wsUrl = 'ws://120.48.156.237:8080/ws'
+  let wsUrl = 'ws://120.48.156.237:8080/ws'
   options = {
     headers: {
       Authorization: `Bearer ${store.get('auth', null).token}`,

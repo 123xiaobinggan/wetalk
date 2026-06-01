@@ -5,11 +5,11 @@
 ## ✨ 特性
 
 - 💬 **私聊 & 群聊**：支持文字、图片、视频、文件传输
-- 📞 **语音通话**：基于 WebRTC 的 P2P 音视频通话
+- 📞 **语音/视频通话**：基于 WebRTC 的 P2P 音视频通话，支持信令通过 WebSocket 传输
 - 🔄 **消息撤回**：支持消息撤回功能
-- 📱 **朋友圈**：发布动态、点赞、评论
-- 🔔 **实时推送**：WebSocket 长连接，消息实时送达
-- 🚀 **高性能**：Netty 高并发 + Redis 缓存 + P2P 流量直连
+- 📱 **朋友圈**：发布动态、点赞、评论 (前端预留/开发中)
+- 🔔 **实时推送**：WebSocket 长连接 + MQ 异步解耦，消息实时送达
+- 🚀 **高性能**：Netty 高并发 WebSocket 服务 + Redis 缓存 + MySQL 持久化
 
 ## 🛠 技术栈
 
@@ -28,12 +28,16 @@
 
 | 技术                 | 用途                 |
 | -------------------- | -------------------- |
-| Java + Spring Boot 3 | 主框架               |
+| Java 17 + Spring Boot 4 | 主框架               |
 | MyBatis              | ORM                  |
-| MySQL                | 数据库               |
-| Redis                | 缓存                 |
+| MySQL                | 关系型数据库         |
+| Redis                | 缓存 (用户信息/Token/会话状态) |
 | Netty                | WebSocket 长连接服务 |
-| WebRTC               | P2P 音视频通话       |
+| RocketMQ / RabbitMQ* | 消息队列 (异步推送/解耦) |
+| JWT                  | 用户认证             |
+| Lombok               | 简化代码             |
+
+> *注：具体 MQ 中间件类型需根据 `pom.xml` 或 `build.gradle` 确认，代码结构中使用了 Producer/Consumer 模式。
 
 ### 服务器 (Server)
 
@@ -47,23 +51,47 @@
 
 ## 🏗 架构设计
 
-- **Netty 长连接**：支持高并发 WebSocket 连接
-- **P2P 通信**：音视频流量不经服务器转发，节省带宽
-- **Redis 缓存**：缓存用户信息和群成员 ID，降低数据库查询压力
+- **Netty 长连接**：
+  - 使用 [NettyServer](file://d:\CODE\vue\wetalk\server\netty\server\NettyServer.java#L14-L53) 启动 WebSocket 服务。
+  - [SessionManager](file://d:\CODE\vue\wetalk\server\netty\session\SessionManager.java#L10-L35) 管理用户 Channel 映射，支持集群扩展预留。
+  - [AuthHandler](file://d:\CODE\vue\wetalk\server\netty\handler\AuthHandler.java#L30-L133) 处理连接鉴权，[HeartbeatHandler](file://d:\CODE\vue\wetalk\server\netty\handler\HeartbeatHandler.java#L21-L147) 处理心跳检测。
+- **业务分层**：
+  - `Controller` 层处理 HTTP 请求（登录、注册、资料修改等）。
+  - `Service` 层处理核心业务逻辑。
+  - `Consumer` 层监听 MQ 消息，处理异步推送任务（如聊天消息推送、通知推送）。
+- **消息推送机制**：
+  - 内部事件通过 [WsEventProducer](file://d:\CODE\vue\wetalk\server\mq\producer\WsEventProducer.java#L10-L48) 发送到 MQ。
+  - `ChatPushConsumer` / [NotifyPushConsumer](file://d:\CODE\vue\wetalk\server\business\notifyPush\consumer\NotifyPushConsumer.java#L16-L31) 消费消息并通过 [SessionManager](file://d:\CODE\vue\wetalk\server\netty\session\SessionManager.java#L10-L35) 找到对应用户连接进行推送。
+- **数据缓存**：
+  - Redis 缓存用户基本信息、Token 有效性及在线状态，降低 DB 压力。
 
 ## 📦 功能模块
 
 ### 客户端功能
 
-- [x] 用户登录 / 注册
-- [x] 私聊消息
+- [x] 用户登录 / 注册 (JWT 认证)
+- [x] 私聊消息 (文本/图片/文件/视频)
 - [x] 群聊消息
-- [x] 会话管理（置顶、免打扰、删除）
-- [x] 图片 / 视频 / 文件传输
-- [x] 语音通话（P2P）
-- [x] 朋友圈（发布、点赞、评论）
+- [x] 会话管理 (置顶、免打扰、删除会话)
+- [x] 好友管理 (添加好友、同意/拒绝、黑名单、删除好友)
+- [x] 群组管理 (创建、解散、邀请、退出、管理员设置)
+- [x] 消息记录查询 (分页加载、本地缓存策略)
+- [x] 语音/视频通话 (信令交互)
+- [ ] 朋友圈 (后端接口预留/开发中)
 
 ## 📡 WebSocket 通信协议
+
+### 消息结构
+
+所有 WebSocket 消息遵循统一结构：
+```json
+{
+  "type": "chat",       // 消息类型
+  "event": "send",      // 事件名称
+  "code": 0,            // 状态码
+  "msg": "success",     // 消息描述
+  "data": { ... }       // 业务数据
+}
 
 ### 消息类型 (Type)
 
